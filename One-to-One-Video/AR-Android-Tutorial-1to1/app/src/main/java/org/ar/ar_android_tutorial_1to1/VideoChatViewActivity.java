@@ -46,15 +46,14 @@ public class VideoChatViewActivity extends AppCompatActivity {
     private boolean mCallEnd;
     private boolean mMuted;
 
-    private FrameLayout mLocalContainer;
-    private RelativeLayout mRemoteContainer;
-    private TextureView mLocalView;
-    private TextureView mRemoteView;
+    private RelativeLayout rl_video;
 
     private ImageView mCallBtn;
     private ImageView mMuteBtn;
     private ImageView mSwitchCameraBtn;
     private LoggerRecyclerView mLogView;
+
+    private ARVideoGroup arVideoGroup;
 
     private final IRtcEngineEventHandler mRtcEventHandler = new IRtcEngineEventHandler() {
         @Override
@@ -84,41 +83,21 @@ public class VideoChatViewActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     mLogView.logI("User offline, uid: " + (uid));
-                    onRemoteUserLeft();
+                    removeRemoteVideo(uid);
                 }
             });
         }
     };
 
     private void setupRemoteVideo(String uid) {
-        int count = mRemoteContainer.getChildCount();
-        View view = null;
-        for (int i = 0; i < count; i++) {
-            View v = mRemoteContainer.getChildAt(i);
-            if (v.getTag() instanceof String && (v.getTag()) .equals( uid)) {
-                view = v;
-            }
-        }
 
-        if (view != null) {
-            return;
-        }
-
-        mRemoteView = RtcEngine.CreateRendererView(getBaseContext());
-        mRemoteContainer.addView(mRemoteView);
-        mRtcEngine.setupRemoteVideo(new org.ar.rtc.VideoCanvas(mRemoteView, Constants.RENDER_MODE_HIDDEN, uid));
-        mRemoteView.setTag(uid);
+       TextureView mRemoteView = RtcEngine.CreateRendererView(getBaseContext());
+        arVideoGroup.addView(uid,mRemoteView);
+        mRtcEngine.setupRemoteVideo(new VideoCanvas(mRemoteView, Constants.RENDER_MODE_HIDDEN, uid));
     }
 
-    private void onRemoteUserLeft() {
-        removeRemoteVideo();
-    }
-
-    private void removeRemoteVideo() {
-        if (mRemoteView != null) {
-            mRemoteContainer.removeView(mRemoteView);
-        }
-        mRemoteView = null;
+    private void removeRemoteVideo(String uid) {
+        arVideoGroup.removeView(uid);
     }
 
     @Override
@@ -135,15 +114,14 @@ public class VideoChatViewActivity extends AppCompatActivity {
     }
 
     private void initUI() {
-        mLocalContainer = findViewById(R.id.local_video_view_container);
-        mRemoteContainer = findViewById(R.id.remote_video_view_container);
-
+        rl_video= findViewById(R.id.rl_video);
         mCallBtn = findViewById(R.id.btn_call);
         mMuteBtn = findViewById(R.id.btn_mute);
         mSwitchCameraBtn = findViewById(R.id.btn_switch_camera);
 
         mLogView = findViewById(R.id.log_recycler_view);
 
+        arVideoGroup = new ARVideoGroup(this,rl_video);
         showSampleLogs();
 
     }
@@ -217,8 +195,8 @@ public class VideoChatViewActivity extends AppCompatActivity {
     }
 
     private void setupLocalVideo() {
-        mLocalView = RtcEngine.CreateRendererView(getBaseContext());
-        mLocalContainer.addView(mLocalView);
+        TextureView mLocalView = RtcEngine.CreateRendererView(getBaseContext());
+        arVideoGroup.addView("local",mLocalView);
         mRtcEngine.setupLocalVideo(new org.ar.rtc.VideoCanvas(mLocalView, Constants.RENDER_MODE_HIDDEN, userId));
     }
 
@@ -275,17 +253,10 @@ public class VideoChatViewActivity extends AppCompatActivity {
     }
 
     private void endCall() {
-        removeLocalVideo();
-        removeRemoteVideo();
+        arVideoGroup.removeAllView();
         leaveChannel();
     }
 
-    private void removeLocalVideo() {
-        if (mLocalView != null) {
-            mLocalContainer.removeView(mLocalView);
-        }
-        mLocalView = null;
-    }
 
     private void showButtons(boolean show) {
         int visibility = show ? View.VISIBLE : View.GONE;
