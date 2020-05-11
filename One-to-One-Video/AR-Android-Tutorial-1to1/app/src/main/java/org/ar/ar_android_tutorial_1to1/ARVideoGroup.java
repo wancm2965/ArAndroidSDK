@@ -25,14 +25,22 @@ public class ARVideoGroup {
 
     //所有视频View的容器
     public RelativeLayout m_rl_video_group;
+    //所有视频的集合
     private LinkedHashMap<String, VideoView> m_list_video;
-    private int Hspace = 2;
-    private int Vspace = 2;
+    //1大1小时小像距屏幕右边的间隔
+    private int HSPACE = 2;
+    //1大1小时小像距屏幕上边的间隔
+    private int VSPACE = 2;
+    //视频View的宽
     private int VIDEO_WIDTH;
+    //视频View的高
     private int VIDEO_HEIGHT;
-    private int SCREEN_WIDTH;//屏幕宽
-    private int SCREEN_HEIGHT;//屏幕高
-    private int VIDEO_NUM = 3;//一排要显示多少个像  会影响小像显示的大小
+    //屏幕宽
+    private int SCREEN_WIDTH;
+    //屏幕高
+    private int SCREEN_HEIGHT;
+    //一排要显示多少个像  会影响小像显示的大小
+    private int VIDEO_NUM = 3;
 
     public ARVideoGroup(Activity activity, RelativeLayout m_rl_video_group) {
         this.m_rl_video_group = m_rl_video_group;
@@ -40,6 +48,7 @@ public class ARVideoGroup {
         initVideoSize(activity);
     }
 
+    //按4:3的比例计算VIDEO_WIDTH VIDEO_HEIGHT
     private void initVideoSize(Activity activity) {
         Point size = new Point();
         Display display = activity.getWindowManager().getDefaultDisplay();
@@ -67,7 +76,7 @@ public class ARVideoGroup {
         public PercentFrameLayout mLayout;
         private Context context;
         private FrameLayout fl_video;
-        public int index;
+        public int index;//下标 用于计算位置
 
         public VideoView(String videoId, TextureView videoView) {
             this.videoId = videoId;
@@ -77,8 +86,8 @@ public class ARVideoGroup {
             mLayout.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
             View view = View.inflate(context, R.layout.layout_video, null);//这个View可完全自定义 需要显示名字或者其他图标可以在里面加
             fl_video = view.findViewById(R.id.fl_video);
-            fl_video.addView(videoView);
-            mLayout.addView(view);
+            fl_video.addView(videoView);//将视频View添加到布局中
+            mLayout.addView(view);//添加到百分比布局中
         }
     }
 
@@ -86,7 +95,7 @@ public class ARVideoGroup {
     public void addView(String vieoId, TextureView video) {
         VideoView videoView = new VideoView(vieoId, video);
         m_list_video.put(vieoId, videoView);
-        m_rl_video_group.addView(videoView.mLayout);
+        m_rl_video_group.addView(videoView.mLayout);//将布局添加到从外面传进来的布局中
         updateLayout();
     }
 
@@ -105,10 +114,11 @@ public class ARVideoGroup {
     }
 
 
+    //更新布局
     private void updateLayout() {
         //改变位置 大小 自己修改
         List<Map.Entry<String, VideoView>> list = new ArrayList<Map.Entry<String, VideoView>>(m_list_video.entrySet());
-        for (int i = 0; i < list.size(); i++) {//排序  index=0的 即为大屏
+        for (int i = 0; i < list.size(); i++) {//排序
             list.get(i).getValue().index = i;
         }
         if (m_list_video.size() <= 2) {//1个本地像和1个远程像
@@ -119,48 +129,24 @@ public class ARVideoGroup {
                 if (render.index == 0) {
                     render.mLayout.setPosition(0, 0, 100, 100);
                 } else {
-                    render.mLayout.setPosition(100-VIDEO_WIDTH-Hspace, Vspace, VIDEO_WIDTH, VIDEO_HEIGHT);
+                    render.mLayout.setPosition(100-VIDEO_WIDTH-HSPACE, VSPACE, VIDEO_WIDTH, VIDEO_HEIGHT);
                 }
                 render.mLayout.requestLayout();
-                m_rl_video_group.requestLayout();
             }
+            m_rl_video_group.requestLayout();
         } else {//3个及以上
             Iterator<Map.Entry<String, VideoView>> iter = m_list_video.entrySet().iterator();
             while (iter.hasNext()) {
                 Map.Entry<String, VideoView> entry = iter.next();
                 VideoView render = entry.getValue();
-                switch (render.index) {
-                    case 0:
-                        render.mLayout.setPosition(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
-                        break;
-                    case 1:
-                        render.mLayout.setPosition(VIDEO_WIDTH, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
-                        break;
-                    case 2:
-                        render.mLayout.setPosition(VIDEO_WIDTH*2, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
-                        break;
-                    case 3:
-                        render.mLayout.setPosition(0, VIDEO_HEIGHT, VIDEO_WIDTH, VIDEO_HEIGHT);
-                        break;
-                    case 4:
-                        render.mLayout.setPosition(VIDEO_WIDTH, VIDEO_HEIGHT, VIDEO_WIDTH, VIDEO_HEIGHT);
-                        break;
-                    case 5:
-                        render.mLayout.setPosition(VIDEO_WIDTH*2, VIDEO_HEIGHT, VIDEO_WIDTH, VIDEO_HEIGHT);
-                        break;
-                    case 6:
-                        render.mLayout.setPosition(0, VIDEO_HEIGHT*2, VIDEO_WIDTH, VIDEO_HEIGHT);
-                        break;
-                    case 7:
-                        render.mLayout.setPosition(VIDEO_WIDTH, VIDEO_HEIGHT*2, VIDEO_WIDTH, VIDEO_HEIGHT);
-                        break;
-                    case 8:
-                        render.mLayout.setPosition(VIDEO_WIDTH*2, VIDEO_HEIGHT*2, VIDEO_WIDTH, VIDEO_HEIGHT);
-                        break;
-                }
+                int row = render.index / 3;
+                int col = render.index % 3;
+                int X = VIDEO_WIDTH * col;
+                int Y = VIDEO_HEIGHT * row;
+                render.mLayout.setPosition(X, Y, VIDEO_WIDTH, VIDEO_HEIGHT);
                 render.mLayout.requestLayout();
-                m_rl_video_group.requestLayout();
             }
+            m_rl_video_group.requestLayout();
         }
     }
 }
