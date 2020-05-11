@@ -2,6 +2,7 @@ package org.ar.ar_android_tutorial_1to1;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -29,6 +30,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class VideoChatViewActivity extends AppCompatActivity {
@@ -36,6 +39,7 @@ public class VideoChatViewActivity extends AppCompatActivity {
 
     private static final int PERMISSION_REQ_ID = 22;
     private String userId = String.valueOf((int) ((Math.random() * 9 + 1) * 100000));
+    private String channelName = "909090";
     private static final String[] REQUESTED_PERMISSIONS = {
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.CAMERA,
@@ -54,6 +58,7 @@ public class VideoChatViewActivity extends AppCompatActivity {
     private LoggerRecyclerView mLogView;
 
     private ARVideoGroup arVideoGroup;
+
 
     private final IRtcEngineEventHandler mRtcEventHandler = new IRtcEngineEventHandler() {
         @Override
@@ -87,18 +92,41 @@ public class VideoChatViewActivity extends AppCompatActivity {
                 }
             });
         }
+
+        @Override
+        public void onWarning(int warn) {
+            super.onWarning(warn);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mLogView.logI("onWarning " + (warn));
+                }
+            });
+        }
+
+        @Override
+        public void onError(int err) {
+            super.onError(err);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mLogView.logI("onError " + (err));
+                }
+            });
+        }
     };
 
     private void setupRemoteVideo(String uid) {
 
        TextureView mRemoteView = RtcEngine.CreateRendererView(getBaseContext());
         arVideoGroup.addView(uid,mRemoteView);
-        mRtcEngine.setupRemoteVideo(new VideoCanvas(mRemoteView, Constants.RENDER_MODE_HIDDEN, uid));
+        mRtcEngine.setupRemoteVideo(new VideoCanvas(mRemoteView, Constants.RENDER_MODE_FIT,channelName, uid,Constants.VIDEO_MIRROR_MODE_ENABLED));
     }
 
     private void removeRemoteVideo(String uid) {
         arVideoGroup.removeView(uid);
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -197,7 +225,8 @@ public class VideoChatViewActivity extends AppCompatActivity {
     private void setupLocalVideo() {
         TextureView mLocalView = RtcEngine.CreateRendererView(getBaseContext());
         arVideoGroup.addView("local",mLocalView);
-        mRtcEngine.setupLocalVideo(new org.ar.rtc.VideoCanvas(mLocalView, Constants.RENDER_MODE_HIDDEN, userId));
+        mRtcEngine.setupLocalVideo(new org.ar.rtc.VideoCanvas(mLocalView, Constants.RENDER_MODE_HIDDEN,channelName, userId,Constants.VIDEO_MIRROR_MODE_AUTO));
+        mRtcEngine.startPreview();
     }
 
     private void joinChannel() {
@@ -206,7 +235,7 @@ public class VideoChatViewActivity extends AppCompatActivity {
             token = null; // default, no token
         }
 
-        mRtcEngine.joinChannel("", "123456", "Extra Optional Data",userId );
+        mRtcEngine.joinChannel("", channelName, "Extra Optional Data",userId );
     }
 
     @Override
