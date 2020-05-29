@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-
+apply plugin: 'bugly'
 android {
     compileSdkVersion 28
 
@@ -7,8 +7,12 @@ android {
         applicationId "org.ar.ar_android_tutorial_1to1"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
+        versionCode 4
+        versionName "1.0.3"
+        ndk {
+            // 设置支持的SO库架构
+            abiFilters 'armeabi-v7a'
+        }
 
     }
 
@@ -27,12 +31,23 @@ android {
             dirs 'libs'
         }
     }
-
+    sourceSets {
+        main.jniLibs.srcDirs = ['libs']
+    }
 }
-
+bugly {
+    debug = true
+    appId = '249e5b7508' // 注册时分配的App ID
+    appKey = '9313b8dc-4fdc-435f-b43c-5c904d43054c' // 注册时分配的App Key
+}
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation(name: 'arsdk-4.0-beta2', ext: 'aar')
+    implementation(name: 'arsdk-4.0-release', ext: 'aar')
     implementation project(path: ':logger')
+    implementation 'com.tencent.bugly:crashreport_upgrade:latest.release'
+    //其中latest.release指代最新Bugly SDK版本号，也可以指定明确的版本号，例如2.1.9
+    implementation 'com.tencent.bugly:nativecrashreport:latest.release'
+
+
 }
