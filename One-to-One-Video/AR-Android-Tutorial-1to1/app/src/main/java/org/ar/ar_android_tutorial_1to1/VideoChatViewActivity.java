@@ -53,7 +53,6 @@ public class VideoChatViewActivity extends AppCompatActivity {
             Manifest.permission.CAMERA,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
-
     private RtcEngine mRtcEngine;
     private boolean mCallEnd;
     private boolean mMuted;
@@ -316,6 +315,7 @@ public class VideoChatViewActivity extends AppCompatActivity {
         int res = mApplyLine ? R.drawable.unapply : R.drawable.apply;
         mApplyLineBtn.setImageResource(res);
         if (mApplyLine){
+            setupVideoConfig();
             setupLocalVideo();
             mMuteAudioBtn.setVisibility(View.VISIBLE);
             mSwitchCameraBtn.setVisibility(View.VISIBLE);
