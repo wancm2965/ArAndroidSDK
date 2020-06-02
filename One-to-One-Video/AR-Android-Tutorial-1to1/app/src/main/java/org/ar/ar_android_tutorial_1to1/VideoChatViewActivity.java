@@ -355,7 +355,6 @@ public class VideoChatViewActivity extends AppCompatActivity {
 
     private void startCall() {
         joinChannel();
-
     }
 
     private void endCall() {
