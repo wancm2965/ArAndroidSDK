@@ -70,7 +70,7 @@ public class ARVideoGroup {
         public TextureView videoView;
         public PercentFrameLayout mLayout;
         private Context context;
-        private FrameLayout fl_video;
+        private RelativeLayout fl_video;
         public int index;//下标 用于计算位置
         public boolean isBigStream;
 

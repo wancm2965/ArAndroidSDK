@@ -150,12 +150,12 @@ public class VideoChatViewActivity extends AppCompatActivity {
             TextureView mRemoteView = RtcEngine.CreateRendererView(getBaseContext());
             arVideoGroup.addView(uid,mRemoteView,true);
             mRtcEngine.setRemoteVideoStreamType(uid,0);
-            mRtcEngine.setupRemoteVideo(new VideoCanvas(mRemoteView, Constants.RENDER_MODE_HIDDEN,CHANNEL_NAME, uid,Constants.VIDEO_MIRROR_MODE_ENABLED));
+            mRtcEngine.setupRemoteVideo(new VideoCanvas(mRemoteView, Constants.RENDER_MODE_HIDDEN,CHANNEL_NAME, uid,Constants.VIDEO_MIRROR_MODE_DISABLED));
         }else {
             TextureView mRemoteView = RtcEngine.CreateRendererView(getBaseContext());
             arVideoGroup.addView(uid,mRemoteView,false);
             mRtcEngine.setRemoteVideoStreamType(uid,1);
-            mRtcEngine.setupRemoteVideo(new VideoCanvas(mRemoteView, Constants.RENDER_MODE_HIDDEN,CHANNEL_NAME, uid,Constants.VIDEO_MIRROR_MODE_ENABLED));
+            mRtcEngine.setupRemoteVideo(new VideoCanvas(mRemoteView, Constants.RENDER_MODE_HIDDEN,CHANNEL_NAME, uid,Constants.VIDEO_MIRROR_MODE_DISABLED));
             updateRemoteVideoMode(false);
         }
     }
